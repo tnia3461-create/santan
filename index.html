@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduQuiz Master - Game Edukasi Interaktif</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col justify-between items-center p-4 selection:bg-brand-500 selection:text-white">
+
+    <!-- Background Elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-2xl bg-slate-800/80 backdrop-blur-md border border-slate-700/60 rounded-3xl shadow-2xl overflow-hidden my-auto z-10 flex flex-col">
+        
+        <!-- HEADER -->
+        <header class="p-6 border-b border-slate-700/60 flex items-center justify-between bg-slate-800/50">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">EduQuiz Master</h1>
+                    <p class="text-xs text-slate-400">Asah Otak & Pengetahuan</p>
+                </div>
+            </div>
+
+            <!-- Quiz Top Info (Hidden in Start & End Screen) -->
+            <div id="quiz-header-info" class="hidden flex items-center space-x-4">
+                <div class="flex items-center space-x-1 bg-slate-900/60 px-3 py-1.5 rounded-full border border-slate-700 text-amber-400 text-sm font-semibold">
+                    <i class="fa-solid fa-heart text-red-500 mr-1 animate-pulse"></i>
+                    <span id="lives-count">3</span>
+                </div>
+                <div class="flex items-center space-x-1 bg-slate-900/60 px-3 py-1.5 rounded-full border border-slate-700 text-brand-500 text-sm font-semibold">
+                    <i class="fa-solid fa-star text-amber-400 mr-1"></i>
+                    <span id="score-count">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <div class="p-6 md:p-8 flex-1 flex flex-col justify-center">
+
+            <!-- 1. SCREEN: START / HOME -->
+            <section id="screen-start" class="space-y-6 text-center">
+                <div class="py-4">
+                    <div class="inline-flex p-4 bg-brand-500/10 rounded-full text-brand-500 mb-4 animate-pulse-subtle border border-brand-500/20">
+                        <i class="fa-solid fa-brain text-5xl"></i>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white">Selamat Datang di EduQuiz!</h2>
+                    <p class="text-slate-400 mt-2 max-w-md mx-auto text-sm md:text-base">
+                        Uji wawasanmu dengan berbagai pertanyaan interaktif. Pertanyaan dan pilihan jawaban akan selalu diacak setiap kali bermain!
+                    </p>
+                </div>
+
+                <!-- Category Selection -->
+                <div class="text-left space-y-2">
+                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400 block ml-1">Pilih Kategori:</label>
+                    <div class="grid grid-cols-2 gap-3" id="category-selector">
+                        <button data-cat="all" class="cat-btn active p-3.5 rounded-xl border border-brand-500 bg-brand-500/10 text-white font-medium text-sm flex items-center justify-between transition-all">
+                            <span><i class="fa-solid fa-shapes text-brand-400 mr-2"></i>Semua Kategori</span>
+                            <i class="fa-solid fa-circle-check text-brand-400 check-icon"></i>
+                        </button>
+                        <button data-cat="umum" class="cat-btn p-3.5 rounded-xl border border-slate-700 bg-slate-900/40 text-slate-300 font-medium text-sm hover:border-slate-600 flex items-center justify-between transition-all">
+                            <span><i class="fa-solid fa-globe text-emerald-400 mr-2"></i>Umum</span>
+                            <i class="fa-solid fa-circle-check text-emerald-400 check-icon hidden"></i>
+                        </button>
+                        <button data-cat="sains" class="cat-btn p-3.5 rounded-xl border border-slate-700 bg-slate-900/40 text-slate-300 font-medium text-sm hover:border-slate-600 flex items-center justify-between transition-all">
+                            <span><i class="fa-solid fa-flask text-cyan-400 mr-2"></i>Sains & Alam</span>
+                            <i class="fa-solid fa-circle-check text-cyan-400 check-icon hidden"></i>
+                        </button>
+                        <button data-cat="matematika" class="cat-btn p-3.5 rounded-xl border border-slate-700 bg-slate-900/40 text-slate-300 font-medium text-sm hover:border-slate-600 flex items-center justify-between transition-all">
+                            <span><i class="fa-solid fa-calculator text-amber-400 mr-2"></i>Matematika</span>
+                            <i class="fa-solid fa-circle-check text-amber-400 check-icon hidden"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button id="btn-start" class="w-full py-4 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-brand-600/30 transition-all text-lg flex items-center justify-center space-x-2">
+                    <span>Mulai Permainan</span>
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </section>
+
+            <!-- 2. SCREEN: QUIZ QUESTION -->
+            <section id="screen-quiz" class="hidden space-y-6">
+                <!-- Progress & Timer Bar -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs font-semibold text-slate-400">
+                        <span id="question-number">Soal 1 dari 10</span>
+                        <span id="timer-text" class="text-amber-400 flex items-center"><i class="fa-solid fa-clock mr-1"></i>15s</span>
+                    </div>
+                    <!-- Progress Bar -->
+                    <div class="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="h-full bg-brand-500 transition-all duration-300 w-0"></div>
+                    </div>
+                </div>
+
+                <!-- Question Box -->
+                <div class="bg-slate-900/50 border border-slate-700/80 p-5 md:p-6 rounded-2xl min-h-[110px] flex items-center">
+                    <h3 id="question-text" class="text-lg md:text-xl font-bold text-slate-100 leading-relaxed">
+                        Loading pertanyaan...
+                    </h3>
+                </div>
+
+                <!-- Answer Options -->
+                <div id="options-container" class="grid grid-cols-1 gap-3">
+                    <!-- Dynamic Buttons Generated Here -->
+                </div>
+
+                <!-- Feedback / Explanation Box -->
+                <div id="feedback-box" class="hidden p-4 rounded-xl text-sm border flex items-start space-x-3">
+                    <i id="feedback-icon" class="fa-solid text-xl mt-0.5"></i>
+                    <div>
+                        <h4 id="feedback-title" class="font-bold"></h4>
+                        <p id="feedback-desc" class="text-slate-300 mt-1"></p>
+                    </div>
+                </div>
+
+                <!-- Action Button (Next Question) -->
+                <button id="btn-next" class="hidden w-full py-3.5 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-all flex items-center justify-center space-x-2">
+                    <span>Pertanyaan Selanjutnya</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </section>
+
+            <!-- 3. SCREEN: RESULT / GAME OVER -->
+            <section id="screen-result" class="hidden space-y-6 text-center">
+                <div class="py-4">
+                    <div id="result-icon-bg" class="inline-flex p-4 bg-emerald-500/10 rounded-full text-emerald-400 mb-3 border border-emerald-500/20">
+                        <i id="result-icon" class="fa-solid fa-trophy text-5xl"></i>
+                    </div>
+                    <h2 id="result-title" class="text-2xl md:text-3xl font-extrabold text-white">Luar Biasa!</h2>
+                    <p id="result-subtitle" class="text-slate-400 text-sm mt-1">Kamu menyelesaikan kuis dengan sangat baik.</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-3 gap-3 bg-slate-900/50 p-4 rounded-2xl border border-slate-700/80">
+                    <div class="text-center">
+                        <p class="text-xs text-slate-400 uppercase font-semibold">Skor Akhir</p>
+                        <p id="final-score" class="text-2xl font-black text-brand-400 mt-1">0</p>
+                    </div>
+                    <div class="text-center border-x border-slate-700">
+                        <p class="text-xs text-slate-400 uppercase font-semibold">Akurasi</p>
+                        <p id="final-accuracy" class="text-2xl font-black text-emerald-400 mt-1">0%</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-slate-400 uppercase font-semibold">Dijawab</p>
+                        <p id="final-answered" class="text-2xl font-black text-amber-400 mt-1">0/10</p>
+                    </div>
+                </div>
+
+                <!-- Play Again Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button id="btn-restart" class="flex-1 py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Main Lagi</span>
+                    </button>
+                    <button id="btn-home" class="py-3.5 px-6 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Menu Utama</span>
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="p-4 border-t border-slate-700/60 bg-slate-800/40 text-center text-xs text-slate-500">
+            Game Edukasi Interaktif &copy; 2026 • Ready for GitHub Pages
+        </footer>
+    </main>
+
+    <!-- GAME LOGIC SCRIPT -->
+    <script>
+        // --- BANK SOAL (Pertanyaan Edukatif) ---
+        const questionBank = [
+            // UMUM
+            {
+                category: 'umum',
+                question: 'Apa nama ibu kota resmi negara Indonesia saat ini?',
+                options: ['Jakarta', 'Nusantara', 'Bandung', 'Surabaya'],
+                answer: 1,
+                explanation: 'Ibu Kota Nusantara (IKN) ditetapkan sebagai ibu kota baru Indonesia menggantikan Jakarta.'
+            },
+            {
+                category: 'umum',
+                question: 'Mata uang resmi yang digunakan di negara Jepang adalah...',
+                options: ['Won', 'Yen', 'Yuan', 'Ringgit'],
+                answer: 1,
+                explanation: 'Yen adalah mata uang resmi Jepang.'
+            },
+            {
+                category: 'umum',
+                question: 'Candi Borobudur yang terkenal terletak di provinsi...',
+                options: ['Jawa Timur', 'Jawa Tengah', 'DI Yogyakarta', 'Jawa Barat'],
+                answer: 1,
+                explanation: 'Candi Borobudur terletak di Kabupaten Magelang, Jawa Tengah.'
+            },
+            {
+                category: 'umum',
+                question: 'Benua terbesar di dunia berdasarkan luas wilayah adalah...',
+                options: ['Afrika', 'Amerika', 'Asia', 'Eropa'],
+                answer: 2,
+                explanation: 'Asia adalah benua terbesar di dunia baik dari segi luas wilayah maupun jumlah penduduk.'
+            },
+            {
+                category: 'umum',
+                question: 'Bahasa resmi yang paling banyak digunakan di negara Brasil adalah...',
+                options: ['Spanyol', 'Inggris', 'Portugis', 'Prancis'],
+                answer: 2,
+                explanation: 'Brasil adalah satu-satunya negara di Amerika Selatan yang menggunakan bahasa Portugis sebagai bahasa resmi.'
+            },
+
+            // SAINS
+            {
+                category: 'sains',
+                question: 'Planet mana yang dikenal sebagai "Planet Merah" dalam tata surya kita?',
+                options: ['Venus', 'Mars', 'Yupiter', 'Saturnus'],
+                answer: 1,
+                explanation: 'Mars disebut Planet Merah karena kandungan besi oksida di permukaannya yang melimpah.'
+            },
+            {
+                category: 'sains',
+                question: 'Proses pembuatan makanan pada tumbuhan hijau dengan bantuan cahaya matahari disebut...',
+                options: ['Respirasi', 'Fotosintesis', 'Transpirasi', 'Osmosis'],
+                answer: 1,
+                explanation: 'Fotosintesis adalah proses tumbuhan mengolah karbon dioksida dan air menjadi glukosa dan oksigen.'
+            },
+            {
+                category: 'sains',
+                question: 'Gas apa yang paling banyak terkandung di dalam atmosfer bumi?',
+                options: ['Oksigen', 'Karbon Dioksida', 'Nitrogen', 'Hidrogen'],
+                answer: 2,
+                explanation: 'Atmosfer bumi terdiri dari sekitar 78% Nitrogen dan 21% Oksigen.'
+            },
+            {
+                category: 'sains',
+                question: 'Organ tubuh manusia yang berfungsi memompa darah ke seluruh tubuh adalah...',
+                options: ['Paru-paru', 'Hati', 'Jantung', 'Ginjal'],
+                answer: 2,
+                explanation: 'Jantung berdetak secara kontinu untuk memompa darah ke seluruh sistem sirkulasi tubuh.'
+            },
+            {
+                category: 'sains',
+                question: 'Simbol kimia untuk unsur Air adalah...',
+                options: ['H2O', 'CO2', 'NaCl', 'O2'],
+                answer: 0,
+                explanation: 'H2O menunjukkan molekul air yang terdiri dari 2 atom Hidrogen dan 1 atom Oksigen.'
+            },
+
+            // MATEMATIKA
+            {
+                category: 'matematika',
+                question: 'Berapakah hasil dari 12 x 8 ?',
+                options: ['86', '96', '104', '92'],
+                answer: 1,
+                explanation: '12 dikali 8 sama dengan 96.'
+            },
+            {
+                category: 'matematika',
+                question: 'Berapa akar kuadrat dari 144?',
+                options: ['10', '11', '12', '14'],
+                answer: 2,
+                explanation: '12 x 12 = 144, maka akar kuadrat dari 144 adalah 12.'
+            },
+            {
+                category: 'matematika',
+                question: 'Jika sebuah segitiga memiliki alas 10 cm dan tinggi 6 cm, berapakah luasnya?',
+                options: ['60 cm²', '30 cm²', '20 cm²', '15 cm²'],
+                answer: 1,
+                explanation: 'Luas segitiga = 1/2 x alas x tinggi = 1/2 x 10 x 6 = 30 cm².'
+            },
+            {
+                category: 'matematika',
+                question: 'Berapakah nilai dari 15% dari 200?',
+                options: ['20', '25', '30', '35'],
+                answer: 2,
+                explanation: '15/100 x 200 = 30.'
+            },
+            {
+                category: 'matematika',
+                question: 'Manakah di antara bilangan berikut yang merupakan bilangan prima?',
+                options: ['9', '15', '17', '21'],
+                answer: 2,
+                explanation: '17 adalah bilangan prima karena hanya memiliki dua faktor, yaitu 1 dan 17.'
+            }
+        ];
+
+        // --- GAME STATE ---
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let correctAnswersCount = 0;
+        let timer = null;
+        let timeLeft = 15;
+        const QUESTION_TIME = 15; // Detik per soal
+        let selectedCategory = 'all';
+
+        // --- DOM ELEMENTS ---
+        const screenStart = document.getElementById('screen-start');
+        const screenQuiz = document.getElementById('screen-quiz');
+        const screenResult = document.getElementById('screen-result');
+        
+        const quizHeaderInfo = document.getElementById('quiz-header-info');
+        const livesCountEl = document.getElementById('lives-count');
+        const scoreCountEl = document.getElementById('score-count');
+
+        const btnStart = document.getElementById('btn-start');
+        const btnNext = document.getElementById('btn-next');
+        const btnRestart = document.getElementById('btn-restart');
+        const btnHome = document.getElementById('btn-home');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const timerTextEl = document.getElementById('timer-text');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackDesc = document.getElementById('feedback-desc');
+
+        // --- HELPER FUNCTIONS ---
+        // Funsi Mengacak Array (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Selected Category Handler
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.cat-btn').forEach(b => {
+                    b.classList.remove('border-brand-500', 'bg-brand-500/10', 'text-white');
+                    b.classList.add('border-slate-700', 'bg-slate-900/40', 'text-slate-300');
+                    b.querySelector('.check-icon').classList.add('hidden');
+                });
+                
+                const current = e.currentTarget;
+                current.classList.remove('border-slate-700', 'bg-slate-900/40', 'text-slate-300');
+                current.classList.add('border-brand-500', 'bg-brand-500/10', 'text-white');
+                current.querySelector('.check-icon').classList.remove('hidden');
+
+                selectedCategory = current.dataset.cat;
+            });
+        });
+
+        // --- GAME LOGIC ---
+
+        function initGame() {
+            // Filter pertanyaan berdasarkan kategori
+            let filtered = selectedCategory === 'all' 
+                ? questionBank 
+                : questionBank.filter(q => q.category === selectedCategory);
+
+            // Acak pertanyaan
+            currentQuestions = shuffleArray(filtered).slice(0, 10); // Ambil maks 10 soal
+            
+            // Format ulang setiap soal agar pilihan jawabannya juga teracak
+            currentQuestions = currentQuestions.map(q => {
+                const optionsWithOriginalIndex = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.answer }));
+                const shuffledOptions = shuffleArray(optionsWithOriginalIndex);
+                
+                return {
+                    question: q.question,
+                    options: shuffledOptions.map(o => o.text),
+                    answer: shuffledOptions.findIndex(o => o.isCorrect),
+                    explanation: q.explanation
+                };
+            });
+
+            currentQuestionIndex = 0;
+            score = 0;
+            lives = 3;
+            correctAnswersCount = 0;
+
+            updateHeaderState();
+
+            screenStart.classList.add('hidden');
+            screenResult.classList.add('hidden');
+            screenQuiz.classList.remove('hidden');
+            quizHeaderInfo.classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function updateHeaderState() {
+            livesCountEl.textContent = lives;
+            scoreCountEl.textContent = score;
+        }
+
+        function loadQuestion() {
+            resetQuestionState();
+
+            const currentQ = currentQuestions[currentQuestionIndex];
+            
+            // UI Update
+            questionNumberEl.textContent = `Soal ${currentQuestionIndex + 1} dari ${currentQuestions.length}`;
+            questionTextEl.textContent = currentQ.question;
+            progressBarEl.style.width = `${((currentQuestionIndex + 1) / currentQuestions.length) * 100}%`;
+
+            // Render options
+            optionsContainerEl.innerHTML = '';
+            currentQ.options.forEach((optionText, index) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full p-4 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-left text-slate-200 font-medium transition-all flex items-center justify-between group`;
+                btn.innerHTML = `
+                    <span class="flex items-center">
+                        <span class="w-7 h-7 rounded-lg bg-slate-700 group-hover:bg-brand-600 text-slate-300 group-hover:text-white flex items-center justify-center text-xs mr-3 transition-colors font-bold">
+                            ${String.fromCharCode(65 + index)}
+                        </span>
+                        ${optionText}
+                    </span>
+                    <i class="fa-regular fa-circle icon-indicator text-slate-500"></i>
+                `;
+                btn.onclick = () => selectAnswer(index);
+                optionsContainerEl.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function resetQuestionState() {
+            clearInterval(timer);
+            timeLeft = QUESTION_TIME;
+            timerTextEl.textContent = `${timeLeft}s`;
+            timerTextEl.classList.remove('text-red-400');
+            timerTextEl.classList.add('text-amber-400');
+            feedbackBox.classList.add('hidden');
+            btnNext.classList.add('hidden');
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                timerTextEl.textContent = `${timeLeft}s`;
+
+                if (timeLeft <= 5) {
+                    timerTextEl.classList.remove('text-amber-400');
+                    timerTextEl.classList.add('text-red-400');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function handleTimeOut() {
+            disableOptions();
+            lives--;
+            updateHeaderState();
+
+            const currentQ = currentQuestions[currentQuestionIndex];
+            highlightCorrectAnswer(currentQ.answer);
+
+            showFeedback(false, "Waktu Habis!", currentQ.explanation);
+            checkGameProgress();
+        }
+
+        function selectAnswer(selectedIndex) {
+            clearInterval(timer);
+            disableOptions();
+
+            const currentQ = currentQuestions[currentQuestionIndex];
+            const isCorrect = selectedIndex === currentQ.answer;
+
+            const allButtons = optionsContainerEl.querySelectorAll('button');
+            const selectedBtn = allButtons[selectedIndex];
+
+            if (isCorrect) {
+                score += 10 + Math.floor(timeLeft * 0.5); // Bonus skor waktu
+                correctAnswersCount++;
+                updateHeaderState();
+
+                selectedBtn.classList.remove('border-slate-700', 'bg-slate-800/80');
+                selectedBtn.classList.add('border-emerald-500', 'bg-emerald-500/10', 'text-emerald-300');
+                selectedBtn.querySelector('.icon-indicator').className = 'fa-solid fa-circle-check text-emerald-400';
+
+                showFeedback(true, "Jawaban Benar!", currentQ.explanation);
+            } else {
+                lives--;
+                updateHeaderState();
+
+                selectedBtn.classList.remove('border-slate-700', 'bg-slate-800/80');
+                selectedBtn.classList.add('border-red-500', 'bg-red-500/10', 'text-red-300');
+                selectedBtn.querySelector('.icon-indicator').className = 'fa-solid fa-circle-xmark text-red-400';
+
+                highlightCorrectAnswer(currentQ.answer);
+                showFeedback(false, "Jawaban Kurang Tepat!", currentQ.explanation);
+            }
+
+            checkGameProgress();
+        }
+
+        function highlightCorrectAnswer(correctIndex) {
+            const allButtons = optionsContainerEl.querySelectorAll('button');
+            const correctBtn = allButtons[correctIndex];
+            correctBtn.classList.remove('border-slate-700', 'bg-slate-800/80');
+            correctBtn.classList.add('border-emerald-500/60', 'bg-emerald-500/10', 'text-emerald-300');
+            correctBtn.querySelector('.icon-indicator').className = 'fa-solid fa-circle-check text-emerald-400';
+        }
+
+        function disableOptions() {
+            const allButtons = optionsContainerEl.querySelectorAll('button');
+            allButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed', 'opacity-90');
+            });
+        }
+
+        function showFeedback(isCorrect, title, explanation) {
+            feedbackBox.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-red-500/10', 'border-red-500/30', 'text-red-400');
+            
+            if (isCorrect) {
+                feedbackBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30');
+                feedbackIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-xl mt-0.5';
+                feedbackTitle.className = 'font-bold text-emerald-400';
+            } else {
+                feedbackBox.classList.add('bg-red-500/10', 'border-red-500/30');
+                feedbackIcon.className = 'fa-solid fa-triangle-exclamation text-red-400 text-xl mt-0.5';
+                feedbackTitle.className = 'font-bold text-red-400';
+            }
+
+            feedbackTitle.textContent = title;
+            feedbackDesc.textContent = explanation;
+        }
+
+        function checkGameProgress() {
+            btnNext.classList.remove('hidden');
+
+            if (lives <= 0) {
+                btnNext.querySelector('span').textContent = "Lihat Hasil (Nyawa Habis)";
+            } else if (currentQuestionIndex >= currentQuestions.length - 1) {
+                btnNext.querySelector('span').textContent = "Selesaikan Kuis";
+            } else {
+                btnNext.querySelector('span').textContent = "Pertanyaan Selanjutnya";
+            }
+        }
+
+        function handleNextQuestion() {
+            if (lives <= 0 || currentQuestionIndex >= currentQuestions.length - 1) {
+                showResult();
+            } else {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        }
+
+        function showResult() {
+            screenQuiz.classList.add('hidden');
+            quizHeaderInfo.classList.add('hidden');
+            screenResult.classList.remove('hidden');
+
+            const total = currentQuestions.length;
+            const accuracy = Math.round((correctAnswersCount / total) * 100);
+
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-accuracy').textContent = `${accuracy}%`;
+            document.getElementById('final-answered').textContent = `${correctAnswersCount}/${total}`;
+
+            const resultIconBg = document.getElementById('result-icon-bg');
+            const resultIcon = document.getElementById('result-icon');
+            const resultTitle = document.getElementById('result-title');
+            const resultSubtitle = document.getElementById('result-subtitle');
+
+            if (lives <= 0) {
+                resultIconBg.className = 'inline-flex p-4 bg-red-500/10 rounded-full text-red-400 mb-3 border border-red-500/20';
+                resultIcon.className = 'fa-solid fa-heart-crack text-5xl';
+                resultTitle.textContent = 'Permainan Selesai!';
+                resultSubtitle.textContent = 'Kamu kehabisan nyawa. Jangan menyerah, ayo coba lagi!';
+            } else if (accuracy >= 80) {
+                resultIconBg.className = 'inline-flex p-4 bg-emerald-500/10 rounded-full text-emerald-400 mb-3 border border-emerald-500/20';
+                resultIcon.className = 'fa-solid fa-trophy text-5xl';
+                resultTitle.textContent = 'Luar Biasa!';
+                resultSubtitle.textContent = 'Pemahaman dan pengetahuanmu sangat tinggi!';
+            } else {
+                resultIconBg.className = 'inline-flex p-4 bg-amber-500/10 rounded-full text-amber-400 mb-3 border border-amber-500/20';
+                resultIcon.className = 'fa-solid fa-medal text-5xl';
+                resultTitle.textContent = 'Kerja Bagus!';
+                resultSubtitle.textContent = 'Terus berlatih untuk meningkatkan pengetahuanmu.';
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        btnStart.addEventListener('click', initGame);
+        btnNext.addEventListener('click', handleNextQuestion);
+        btnRestart.addEventListener('click', initGame);
+        btnHome.addEventListener('click', () => {
+            screenResult.classList.add('hidden');
+            screenStart.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
